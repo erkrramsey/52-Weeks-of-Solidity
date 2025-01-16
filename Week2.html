@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ERC-Master: Empowering Master-Child NFT Relationships</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="ERC-Master enables master NFTs to own and control other NFTs, fostering complex hierarchical relationships and interoperability across multiple token standards.">
+    <meta name="keywords"
+        content="ERC-Master, Blockchain, NFT Relationships, ERC-721, Master NFT, Child NFT, Solidity, OpenZeppelin, DeFi, Gaming">
+    <meta property="og:title" content="ERC-Master: Empowering Master-Child NFT Relationships">
+    <meta property="og:description"
+        content="Manage and visualize hierarchical NFT structures with ERC-Master, allowing master NFTs to control and own multiple child NFTs.">
+    <meta property="og:image" content="https://example.com/og-image-nft.jpg">
+    <meta property="og:url" content="https://ercinteroperablenft.com">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- D3.js for Graph Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.4/d3.min.js" integrity="sha512-..."
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Styles -->
+    <style>
+        /* RESET & BASE STYLES */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            background-color: #f7f7f7;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        section {
+            padding: 60px 20px;
+        }
+
+        pre,
+        code {
+            background: #f9f9f9;
+            padding: 20px;
+            display: block;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 6px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* DARK MODE STYLES */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode pre,
+        body.dark-mode code {
+            background: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
+        }
+
+        body.dark-mode header {
+            background: #1f1f1f;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background: #333;
+            color: #fff;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s;
+        }
+
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav li {
+            position: relative;
+        }
+
+        nav a {
+            color: #fff;
+            font-weight: 600;
+            transition: color 0.3s, transform 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s;
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+        }
+
+        nav a:hover::after,
+        nav a:focus::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: #eee;
+            transform: scale(1.05);
+        }
+
+        /* MOBILE MENU */
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background: #333;
+                padding: 20px;
+                border-radius: 8px;
+                display: none;
+                width: 200px;
+            }
+
+            nav ul.active {
+                display: flex;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            color: #fff;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: radial-gradient(circle at 50%, rgba(255, 255, 255, 0.1) 20%, transparent 60%);
+            animation: swirl 8s infinite alternate;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @keyframes swirl {
+            0% {
+                transform: translateY(0) rotate(0);
+            }
+
+            100% {
+                transform: translateY(-10%) rotate(10deg);
+            }
+        }
+
+        .hero h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease both;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease both;
+        }
+
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #fff;
+            color: #ff7e5f;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus {
+            background-color: #ff7e5f;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* DARK MODE TOGGLE */
+        .dark-mode-toggle {
+            cursor: pointer;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .dark-mode-toggle:hover,
+        .dark-mode-toggle:focus {
+            color: #e0e0e0;
+        }
+
+        /* MAIN SECTIONS */
+        .main-section h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .main-section p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* DEMO SECTION */
+        .demo-section {
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #graph-container {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            background-color: #fafafa;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .demo-controls {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .demo-controls input,
+        .demo-controls select,
+        .demo-controls button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border 0.3s;
+        }
+
+        .demo-controls input:focus,
+        .demo-controls select:focus {
+            border-color: #ff7e5f;
+            outline: none;
+        }
+
+        .demo-controls button {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .demo-controls button:hover,
+        .demo-controls button:focus {
+            opacity: 0.8;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: fill 0.3s, r 0.2s;
+        }
+
+        .node:hover {
+            fill: #ff4081;
+            r: 14;
+        }
+
+        /* CONTACT SECTION */
+        .contact-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contact-content form {
+            width: 100%;
+            max-width: 500px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark-mode .contact-content form {
+            background-color: #1e1e1e;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-content form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .contact-content form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-content form input,
+        .contact-content form textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            transition: border 0.2s;
+        }
+
+        body.dark-mode .contact-content form input,
+        body.dark-mode .contact-content form textarea {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+
+        .contact-content form input:focus,
+        .contact-content form textarea:focus {
+            border-color: #ff7e5f;
+            outline: none;
+        }
+
+        .contact-content form button {
+            background-color: #ff7e5f;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .contact-content form button:hover,
+        .contact-content form button:focus {
+            background-color: #feb47b;
+            transform: translateY(-2px);
+        }
+
+        /* USE CASES STYLES */
+        .section {
+            margin: 40px auto;
+            max-width: 1000px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark-mode .section {
+            background: #1e1e1e;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        body.dark-mode .section h2 {
+            color: #e0e0e0;
+        }
+
+        .section h3 {
+            font-size: 18px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        body.dark-mode .section h3 {
+            color: #cccccc;
+        }
+
+        .section ul {
+            list-style: disc;
+            margin-left: 20px;
+        }
+
+        .section ul li strong {
+            color: #ff7e5f;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode footer {
+            background-color: #1f1f1f;
+            color: #e0e0e0;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .hero h2 {
+                font-size: 32px;
+            }
+
+            .demo-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #graph-container {
+                height: 300px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+
+        /* D3.js GRAPH STYLES */
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .node {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        /* DARK MODE GRAPH STYLES */
+        body.dark-mode .link {
+            stroke: #555;
+        }
+
+        body.dark-mode .node {
+            stroke: #333;
+        }
+
+        /* SMOOTH SCROLLING */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ACTIVE NAV LINK */
+        nav a.active {
+            color: #ff4081;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="container">
+            <h1>ERCInteroperableNFT</h1>
+            <nav aria-label="Main Navigation">
+                <button class="mobile-menu-button" aria-label="Toggle Menu">
+                    ☰
+                </button>
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#proposal">EIP Proposal</a></li>
+                    <li><a href="#implementation">Implementation</a></li>
+                    <li><a href="#use-cases">Use Cases</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><button class="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="hero" aria-labelledby="hero-heading">
+        <h2 id="hero-heading">Empowering Master-Child NFT Relationships</h2>
+        <p>Manage, control, and visualize hierarchical NFT structures with ERC-Master.</p>
+        <a href="#proposal" class="cta-button">Learn More</a>
+    </section>
+
+    <!-- EIP PROPOSAL SECTION -->
+    <section id="proposal" class="main-section" aria-labelledby="proposal-heading">
+        <div class="container">
+            <h2 id="proposal-heading">1. ERC-Master EIP-Style Proposal</h2>
+            <p>
+                ERC-Master enables each <strong>master NFT</strong> to own and control multiple <strong>child
+                    NFTs</strong>, facilitating complex hierarchical relationships across ERC-721 tokens. Below is a
+                formal EIP-style proposal detailing the rationale, specification, and key features.
+            </p>
+            <pre><code>
+# Preamble
+
+EIP: <to be assigned>
+Title: ERC-Master - Master NFTs Controlling Child NFTs
+Author: [BoredNBased] <BoredNBased@Gmail.com>
+Type: Standards Track
+Category: ERC
+Status: Draft
+Created: 2025-01-16
+
+# Abstract
+
+The ERC-Master standard defines an extension of ERC-721 where each master NFT can own and control multiple child NFTs. This structure allows for hierarchical ownership, enabling functionalities such as bundled assets, dynamic metadata management, and interoperable NFT ecosystems. The standard includes mechanisms for locking, releasing, and transferring child NFTs within the master-child framework.
+
+# Motivation
+
+While ERC-721 tokens provide uniqueness, they lack the ability to represent hierarchical relationships inherently. ERC-Master introduces a method for master NFTs to manage and control other NFTs, enabling use cases like asset bundling, game item management, and complex ownership structures within decentralized applications.
+
+# Specification
+
+interface ERC-Master is IERC721 {
+    event MasterCreated(uint256 indexed masterId, address indexed owner);
+    event ChildLocked(uint256 indexed masterId, address indexed nftAddress, uint256 indexed tokenId);
+    event ChildReleased(uint256 indexed masterId, address indexed nftAddress, uint256 indexed tokenId);
+    event MasterTransferred(uint256 indexed masterId, address indexed from, address indexed to);
+
+    function createMasterNFT(string memory tokenURI_) external returns (uint256 masterId);
+    function lockChildNFT(uint256 masterId, address nftAddress, uint256 tokenId) external;
+    function releaseChildNFT(uint256 masterId, address nftAddress, uint256 tokenId) external;
+    function transferMasterNFT(uint256 masterId, address to) external;
+    function getLockedChildren(uint256 masterId) external view returns (ChildNFT[] memory);
+}
+
+# Rationale
+
+1. **Hierarchical Ownership**: Facilitates complex ownership structures beyond single-level token ownership.
+2. **Interoperability**: Builds on ERC-721, ensuring compatibility with existing NFT ecosystems and marketplaces.
+3. **Flexibility**: Supports diverse use cases, including asset bundling, game item management, and decentralized governance structures.
+
+# Security Considerations
+
+- **Access Control**: Only master NFT owners can lock or release child NFTs.
+- **Input Validation**: Ensures validity of NFT addresses and token IDs to prevent unauthorized actions.
+- **Reentrancy**: Utilizes OpenZeppelin's ReentrancyGuard to protect against reentrancy attacks.
+- **Ownership Integrity**: Maintains accurate tracking of master-child relationships during transfers and burns.
+
+# References
+
+- ERC-721: Non-Fungible Token Standard
+- OpenZeppelin Contracts
+- Ethereum Improvement Proposals (eips.ethereum.org)
+            </code></pre>
+            <p>
+                By enabling master NFTs to control multiple child NFTs, ERC-Master unlocks a myriad of
+                possibilities—from asset bundling in gaming to complex ownership structures in DeFi applications.
+            </p>
+        </div>
+    </section>
+
+    <!-- IMPLEMENTATION SECTION -->
+    <section id="implementation" class="main-section" aria-labelledby="implementation-heading">
+        <div class="container">
+            <h2 id="implementation-heading">2. Full ERC-Master Solidity Implementation</h2>
+            <p>
+                Below is a <strong>Solidity contract</strong> implementing ERC-Master using OpenZeppelin. It
+                demonstrates how master NFTs can own and control multiple child NFTs, ensuring secure and efficient
+                management of hierarchical NFT relationships.
+            </p>
+            <pre><code>
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// OpenZeppelin Contracts
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol"; // Added Import for IERC721
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+/**
+ * @title ERC-Master
+ * @dev ERC-721 compliant contract where each master NFT can own/control other NFTs.
+ */
+contract ERC-Master is
+    ERC721Enumerable,
+    ReentrancyGuard,
+    IERC721Receiver,
+    Ownable
+{
+    using Counters for Counters.Counter;
+    Counters.Counter private _masterCounter;
+
+    // Struct representing a child NFT
+    struct ChildNFT {
+        address contractAddress;
+        uint256 tokenId;
+    }
+
+    // Struct representing a master NFT
+    struct MasterNFT {
+        address owner;
+        ChildNFT[] lockedTokens;
+    }
+
+    // Mapping from master NFT ID to its details
+    mapping(uint256 => MasterNFT) private masterNFTs;
+
+    // Mapping from master NFT ID to token URI
+    mapping(uint256 => string) private _tokenURIs;
+
+    // Events
+    event MasterCreated(uint256 indexed masterId, address indexed owner);
+    event LockedNFT(
+        uint256 indexed masterId,
+        address indexed nftAddress,
+        uint256 indexed tokenId
+    );
+    event ReleasedNFT(
+        uint256 indexed masterId,
+        address indexed nftAddress,
+        uint256 indexed tokenId
+    );
+    event TransferMasterNFT(
+        uint256 indexed masterId,
+        address indexed from,
+        address indexed to
+    );
+
+    /**
+     * @dev Constructor to set the name and symbol of the master NFT collection.
+     */
+    constructor() ERC721("Interoperable NFT", "INFT") {}
+
+    /**
+     * @dev Creates a new master NFT and mints it to the caller.
+     * @param tokenURI_ Metadata URI for the master NFT.
+     * @return masterId The ID of the newly created master NFT.
+     */
+    function createMasterNFT(string memory tokenURI_)
+        external
+        nonReentrant
+        returns (uint256 masterId)
+    {
+        _masterCounter.increment();
+        masterId = _masterCounter.current();
+        _safeMint(msg.sender, masterId);
+        _tokenURIs[masterId] = tokenURI_;
+
+        masterNFTs[masterId].owner = msg.sender;
+
+        emit MasterCreated(masterId, msg.sender);
+    }
+
+    /**
+     * @dev Returns the token URI for a given token ID.
+     * @param tokenId The token ID to query.
+     * @return The token URI string.
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI set of nonexistent token"
+        );
+
+        return _tokenURIs[tokenId];
+    }
+
+    /**
+     * @dev Sets the token URI for a given token ID.
+     * Only the owner of the contract can set the token URI.
+     * @param tokenId The token ID to set its URI.
+     * @param tokenURI_ The token URI string.
+     */
+    function setTokenURI(uint256 tokenId, string memory tokenURI_)
+        external
+        onlyOwner
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI set of nonexistent token"
+        );
+        _tokenURIs[tokenId] = tokenURI_;
+    }
+
+    /**
+     * @dev Internal function to check if a contract address supports the ERC721 interface.
+     * @param nftAddress Address of the NFT contract to check.
+     * @return bool Whether the contract supports ERC721.
+     */
+    function _isERC721(address nftAddress) internal view returns (bool) {
+        try
+            IERC721(nftAddress).supportsInterface(type(IERC721).interfaceId)
+        returns (bool isSupported) {
+            return isSupported;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Locks a child NFT into a master NFT.
+     * The master NFT must be owned by the caller.
+     * The child NFT is transferred to this contract and associated with the master NFT.
+     * @param masterId The ID of the master NFT.
+     * @param nftAddress The contract address of the child NFT.
+     * @param tokenId The token ID of the child NFT.
+     */
+    function lockNFT(
+        uint256 masterId,
+        address nftAddress,
+        uint256 tokenId
+    ) external nonReentrant {
+        require(
+            _exists(masterId),
+            "Master NFT does not exist"
+        );
+        require(
+            ownerOf(masterId) == msg.sender,
+            "Caller is not the owner of the master NFT"
+        );
+        require(_isERC721(nftAddress), "Address does not support ERC721");
+        require(
+            IERC721(nftAddress).ownerOf(tokenId) == msg.sender,
+            "Caller does not own the child NFT"
+        );
+
+        // Transfer the child NFT to this contract
+        IERC721(nftAddress).safeTransferFrom(
+            msg.sender,
+            address(this),
+            tokenId
+        );
+
+        // Add to locked tokens
+        masterNFTs[masterId].lockedTokens.push(
+            ChildNFT({contractAddress: nftAddress, tokenId: tokenId})
+        );
+
+        emit LockedNFT(masterId, nftAddress, tokenId);
+    }
+
+    /**
+     * @dev Releases a locked child NFT from a master NFT.
+     * The master NFT must be owned by the caller.
+     * The child NFT is transferred back to the caller.
+     * @param masterId The ID of the master NFT.
+     * @param nftAddress The contract address of the child NFT.
+     * @param tokenId The token ID of the child NFT.
+     */
+    function releaseNFT(
+        uint256 masterId,
+        address nftAddress,
+        uint256 tokenId
+    ) external nonReentrant {
+        require(
+            _exists(masterId),
+            "Master NFT does not exist"
+        );
+        require(
+            ownerOf(masterId) == msg.sender,
+            "Caller is not the owner of the master NFT"
+        );
+
+        ChildNFT[] storage locked = masterNFTs[masterId].lockedTokens;
+        bool found = false;
+        uint256 index;
+
+        // Find the child NFT in the locked tokens
+        for (uint256 i = 0; i < locked.length; i++) {
+            if (
+                locked[i].contractAddress == nftAddress &&
+                locked[i].tokenId == tokenId
+            ) {
+                found = true;
+                index = i;
+                break;
+            }
+        }
+
+        require(found, "Child NFT not locked in this master NFT");
+
+        // Remove the child NFT from the locked tokens
+        locked[index] = locked[locked.length - 1];
+        locked.pop();
+
+        // Transfer the child NFT back to the caller
+        IERC721(nftAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            tokenId
+        );
+
+        emit ReleasedNFT(masterId, nftAddress, tokenId);
+    }
+
+    /**
+     * @dev Returns the list of child NFTs locked in a master NFT.
+     * @param masterId The ID of the master NFT.
+     * @return An array of ChildNFT structs.
+     */
+    function getLockedNFTs(uint256 masterId)
+        external
+        view
+        returns (ChildNFT[] memory)
+    {
+        require(
+            _exists(masterId),
+            "Master NFT does not exist"
+        );
+        return masterNFTs[masterId].lockedTokens;
+    }
+
+    /**
+     * @dev Overrides the _beforeTokenTransfer hook from ERC721 to handle ownership changes.
+     * Ensures that the masterNFTs mapping reflects the new owner.
+     * @param from The address transferring the token.
+     * @param to The address receiving the token.
+     * @param tokenId The token ID being transferred.
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        super._beforeTokenTransfer(from, to, tokenId);
+
+        // If the token is being burned
+        if (to == address(0)) {
+            ChildNFT[] storage locked = masterNFTs[tokenId].lockedTokens;
+            for (uint256 i = 0; i < locked.length; i++) {
+                IERC721(locked[i].contractAddress).safeTransferFrom(
+                    address(this),
+                    from,
+                    locked[i].tokenId
+                );
+                emit ReleasedNFT(
+                    tokenId,
+                    locked[i].contractAddress,
+                    locked[i].tokenId
+                );
+            }
+            delete masterNFTs[tokenId];
+        }
+
+        // If the token is being transferred to another address
+        if (from != address(0) && to != address(0) && from != to) {
+            masterNFTs[tokenId].owner = to;
+            emit TransferMasterNFT(tokenId, from, to);
+        }
+    }
+
+    /*
+     * @dev Implements the ERC721Receiver interface to accept safe transfers of child NFTs.
+     * Ensures that the child NFT is intended to be locked into a master NFT.
+     * @param operator The address which called `safeTransferFrom`. (Unused)
+     * @param from The address which previously owned the token.
+     * @param tokenId The NFT identifier which is being transferred.
+     * @param data Additional data with no specified format. Encoded as (masterId).
+     * @return bytes4 Return value indicating successful receipt of the NFT.
+     */
+    function onERC721Received(
+        address, // operator (unused)
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        // Decode the masterId from data
+        require(data.length == 32, "Invalid data for masterId");
+        uint256 masterId = abi.decode(data, (uint256));
+
+        require(
+            _exists(masterId),
+            "Master NFT does not exist"
+        );
+        require(
+            ownerOf(masterId) == from,
+            "Sender is not the owner of the master NFT"
+        );
+
+        // Add to locked tokens
+        masterNFTs[masterId].lockedTokens.push(
+            ChildNFT({contractAddress: msg.sender, tokenId: tokenId})
+        );
+
+        emit LockedNFT(masterId, msg.sender, tokenId);
+
+        return this.onERC721Received.selector;
+    }
+
+    /**
+     * @dev Overrides the supportsInterface function to include interfaces from inherited contracts.
+     * @param interfaceId The interface identifier, as specified in ERC-165.
+     * @return bool Whether the contract implements the requested interface.
+     */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+}
+            </code></pre>
+            <p>
+                The ERC-Master contract allows master NFTs to securely lock and manage multiple child NFTs,
+                ensuring seamless integration and control within decentralized ecosystems.
+            </p>
+        </div>
+    </section>
+
+    <!-- USE CASES SECTION -->
+    <section id="use-cases" class="main-section" aria-labelledby="use-cases-heading">
+        <div class="container">
+            <h2 id="use-cases-heading">3. Comprehensive Use Cases & Ecosystems</h2>
+            <p>
+                Below are **15** ecosystems that demonstrate how ERC-Master can power diverse hierarchical NFT
+                environments—from asset bundling in gaming to complex ownership structures in DeFi. Adapt these ideas to
+                enhance your projects!
+            </p>
+            <ol>
+                <li><strong>Gaming Asset Bundling</strong><br />
+                    <em>Description:</em> Grouping in-game items under a master NFT for streamlined management.<br />
+                    <em>Example:</em> A "Warrior Master NFT" can own various weapons (child NFTs) like swords, shields,
+                    and armor, allowing players to manage their equipment collectively.
+                </li>
+                <li><strong>Art Collections Management</strong><br />
+                    <em>Description:</em> Organizing individual artworks under a master collection NFT.<br />
+                    <em>Example:</em> An artist mints a "Master Collection NFT" that owns multiple "Artwork NFTs,"
+                    simplifying provenance and ownership tracking.
+                </li>
+                <li><strong>DeFi Asset Structuring</strong><br />
+                    <em>Description:</em> Structuring complex financial instruments with master-child NFT
+                    relationships.<br />
+                    <em>Example:</em> A "Portfolio Master NFT" can own various ERC-20 tokens and ERC-721 NFTs,
+                    representing a diversified investment portfolio.
+                </li>
+                <li><strong>Real Estate Tokenization</strong><br />
+                    <em>Description:</em> Managing multiple property NFTs under a single master NFT.<br />
+                    <em>Example:</em> A "Real Estate Master NFT" owns NFTs representing different properties, enabling
+                    consolidated management and fractional ownership.
+                </li>
+                <li><strong>DAO Governance Structures</strong><br />
+                    <em>Description:</em> Creating hierarchical governance tokens within a DAO framework.<br />
+                    <em>Example:</em> A "DAO Master NFT" controls various "Governance Child NFTs," each representing
+                    different voting rights or proposal categories.
+                </li>
+                <li><strong>Music Rights Management</strong><br />
+                    <em>Description:</em> Organizing music tracks and rights under a master NFT.<br />
+                    <em>Example:</em> An "Album Master NFT" owns individual "Track NFTs," each representing a song's
+                    rights and royalties.
+                </li>
+                <li><strong>Educational Certifications</strong><br />
+                    <em>Description:</em> Issuing master certification NFTs that control multiple course completion
+                    NFTs.<br />
+                    <em>Example:</em> A "Degree Master NFT" can own "Course Completion NFTs," representing individual
+                    courses completed towards the degree.
+                </li>
+                <li><strong>Event Ticketing Systems</strong><br />
+                    <em>Description:</em> Managing multiple event tickets under a master NFT.<br />
+                    <em>Example:</em> A "Festival Master NFT" owns all "Ticket NFTs," allowing organizers to manage
+                    ticket distribution and access control efficiently.
+                </li>
+                <li><strong>Charity Donation Tracking</strong><br />
+                    <em>Description:</em> Consolidating multiple donation NFTs under a single master NFT for
+                    transparency.<br />
+                    <em>Example:</em> A "Charity Master NFT" owns various "Donation NFTs," each representing individual
+                    contributions and their allocation.
+                </li>
+                <li><strong>Vehicle Ownership Tokens</strong><br />
+                    <em>Description:</em> Managing multiple vehicle NFTs under a master ownership NFT.<br />
+                    <em>Example:</em> A "Fleet Master NFT" owns NFTs representing individual vehicles, facilitating
+                    fleet management and ownership transfers.
+                </li>
+                <li><strong>Intellectual Property Management</strong><br />
+                    <em>Description:</em> Organizing patents and trademarks under a master IP NFT.<br />
+                    <em>Example:</em> An "IP Master NFT" can own multiple "Patent NFTs," simplifying IP portfolio
+                    management.
+                </li>
+                <li><strong>Supply Chain Tracking</strong><br />
+                    <em>Description:</em> Linking various supply chain component NFTs under a master NFT for end-to-end
+                    tracking.<br />
+                    <em>Example:</em> A "Product Master NFT" owns "Component NFTs" representing different stages of the
+                    supply chain, ensuring transparency and traceability.
+                </li>
+                <li><strong>Virtual Real Estate Management</strong><br />
+                    <em>Description:</em> Managing parcels of virtual land under a master NFT.<br />
+                    <em>Example:</em> A "Virtual Estate Master NFT" owns multiple "Land Parcel NFTs," enabling
+                    consolidated management of virtual properties in the metaverse.
+                </li>
+                <li><strong>Healthcare Records Management</strong><br />
+                    <em>Description:</em> Organizing patient records as child NFTs under a master health record
+                    NFT.<br />
+                    <em>Example:</em> A "Health Record Master NFT" owns "Medical History NFTs," allowing secure and
+                    organized access to patient data.
+                </li>
+                <li><strong>Fashion Collections</strong><br />
+                    <em>Description:</em> Grouping clothing items and accessories under a master NFT.<br />
+                    <em>Example:</em> A "Fashion Line Master NFT" owns various "Apparel NFTs," representing different
+                    clothing items in a collection.
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- USE CASES & FIXES SECTION -->
+    <section id="expansion" aria-labelledby="expansion-heading">
+        <h1 style="text-align: center; margin-top: 40px; font-size: 32px;">
+            ERC-Master Use Cases
+        </h1>
+
+        <div class="section">
+            <h2>1️⃣ Managing Hierarchical NFT Structures</h2>
+            <p>You can create and manage complex ownership hierarchies:</p>
+            <ul>
+                <li><strong>Master NFTs</strong> → Own multiple Child NFTs across various ERC-721 contracts</li>
+                <li><strong>Child NFTs</strong> → Represent individual assets controlled by Master NFTs</li>
+                <li><strong>Interoperability</strong> → Seamlessly integrate NFTs from different projects and standards
+                </li>
+            </ul>
+            <h3>✅ Example:</h3>
+            <p>
+                MasterNFT-1 owns ChildNFT-A (Art), ChildNFT-B (Game Item), and ChildNFT-C (DeFi Token).
+            </p>
+            <pre class="code">
+createMasterNFT("https://example.com/metadata/master1.json");
+lockChildNFT(1, artContractAddress, 101);
+lockChildNFT(1, gameContractAddress, 202);
+lockChildNFT(1, defiContractAddress, 303);
+            </pre>
+        </div>
+
+        <!-- [Additional sections omitted for brevity; include all sections as in your original code] -->
+
+        <div class="section">
+            <h2>💡 Advanced: Batch Processing for Large-Scale Hierarchies</h2>
+            <h3>✅ Batch Create Master NFTs:</h3>
+            <pre class="code">
+string[] memory tokenURIs = ["https://example.com/metadata/master1.json", "https://example.com/metadata/master2.json"];
+for(uint i = 0; i < tokenURIs.length; i++) {
+    createMasterNFT(tokenURIs[i]);
+}
+            </pre>
+            <h3>✅ Batch Lock Child NFTs:</h3>
+            <pre class="code">
+uint256 masterId = 1;
+address[] memory nftAddresses = [artContractAddress, gameContractAddress, defiContractAddress];
+uint256[] memory tokenIds = [101, 202, 303];
+for(uint i = 0; i < nftAddresses.length; i++) {
+    lockChildNFT(masterId, nftAddresses[i], tokenIds[i]);
+}
+            </pre>
+        </div>
+
+        <h2 style="text-align: center; margin-top: 40px; font-size: 28px;">
+            🚀 Conclusion
+        </h2>
+        <p style="text-align: center; max-width: 900px; margin: 0 auto 60px auto;">
+            The <strong>ERC-Master</strong> contract facilitates comprehensive management of hierarchical NFT
+            relationships across ERC-721 tokens. This is ideal for:
+        </p>
+        <ul style="max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8;">
+            <li>✅ Gaming Asset Bundling</li>
+            <li>✅ Art Collections Management</li>
+            <li>✅ DeFi Asset Structuring</li>
+            <li>✅ Complex Ownership Structures</li>
+        </ul>
+    </section>
+
+    <!-- INTERACTIVE DEMO SECTION -->
+    <section id="demo" class="demo-section" aria-labelledby="demo-heading">
+        <div class="container">
+            <h2 id="demo-heading">4. Interactive Demo: Visualizing Master-Child NFT Relationships</h2>
+            <p>
+                Experience our <strong>hierarchical NFT graph</strong> demo. Add master NFTs, lock child NFTs, and
+                visualize their relationships.
+            </p>
+            <!-- Graph Container -->
+            <div id="graph-container" aria-label="Interactive Master-Child NFT Graph"></div>
+
+            <!-- Demo Controls -->
+            <div class="demo-controls">
+                <input type="text" id="master-name" placeholder="Master NFT Name (e.g. 'Master1')"
+                    aria-label="Master NFT Name" />
+                <button id="add-master">Add Master NFT</button>
+                <select id="lock-master" aria-label="Lock To Master"></select>
+                <input type="text" id="child-nft-address" placeholder="Child NFT Address"
+                    aria-label="Child NFT Address" />
+                <input type="number" id="child-token-id" placeholder="Child Token ID" aria-label="Child Token ID" />
+                <button id="lock-child">Lock Child NFT</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="main-section" aria-labelledby="contact-heading">
+        <div class="container">
+            <h2 id="contact-heading">6. Contact & Feedback</h2>
+            <p>
+                Have questions or ideas for integrating ERC-Master into your project?
+                Fill out the form below, and we’ll be in touch.
+            </p>
+            <div class="contact-content">
+                <form id="contact-form" aria-label="Contact Form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" placeholder="Your Name" required aria-required="true" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Your Email" required aria-required="true" />
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" rows="5" placeholder="Your Message" required
+                            aria-required="true"></textarea>
+                    </div>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 BoredNBased. All rights reserved.</p>
+    </footer>
+
+    <!-- INLINE JS: INTERACTIVE DEMO, FORM HANDLING, ETC. -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const masters = []; // Each element is { id: "someString" }
+            const children = []; // Each element is { id: "someString" }
+            const links = []; // Each element is { source: "masterId", target: "childId" }
+            const width = document.getElementById("graph-container").clientWidth;
+            const height = 400;
+
+            // Create an SVG element for D3
+            const svg = d3.select("#graph-container")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .call(d3.zoom().on("zoom", function (event) {
+                    svg.attr("transform", event.transform);
+                }))
+                .append("g");
+
+            // D3 force simulation
+            const simulation = d3.forceSimulation(masters.concat(children))
+                .force("link", d3.forceLink(links).distance(150).id(d => d.id))
+                .force("charge", d3.forceManyBody().strength(-500))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            // Helper: get node object by ID
+            function getNodeById(id) {
+                return masters.find(n => n.id === id) || children.find(n => n.id === id);
+            }
+
+            function updateGraph() {
+                // LINK elements
+                const link = svg.selectAll(".link")
+                    .data(links, d => d.source.id + "-" + d.target.id)
+                    .join("line")
+                    .attr("class", "link")
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+
+                // NODE elements
+                const node = svg.selectAll(".node")
+                    .data(masters.concat(children), d => d.id)
+                    .join("circle")
+                    .attr("class", "node")
+                    .attr("r", d => d.type === 'master' ? 20 : 10)
+                    .attr("fill", d => d.type === 'master' ? "#ff7e5f" : "#feb47b")
+                    .call(drag(simulation));
+
+                // Tooltip
+                node.append("title").text(d => d.id);
+
+                // Update simulation
+                simulation.nodes(masters.concat(children));
+                simulation.force("link").links(links);
+                simulation.alpha(1).restart();
+
+                simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    node
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
+                });
+            }
+
+            // D3 drag behavior
+            function drag(sim) {
+                function dragstarted(event, d) {
+                    if (!event.active) sim.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+                function dragended(event, d) {
+                    if (!event.active) sim.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+                return d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended);
+            }
+
+            // Update the dropdowns to reflect the current master set
+            function updateSelectOptions() {
+                const lockMasterSelect = document.getElementById("lock-master");
+
+                lockMasterSelect.innerHTML = "";
+
+                masters.forEach(master => {
+                    const opt = document.createElement("option");
+                    opt.value = master.id;
+                    opt.textContent = master.id;
+                    lockMasterSelect.appendChild(opt);
+                });
+            }
+
+            // Add Master NFT Button
+            document.getElementById("add-master").addEventListener("click", () => {
+                const masterName = document.getElementById("master-name").value.trim();
+                // Prevent duplicates
+                if (masterName && !getNodeById(masterName)) {
+                    masters.push({ id: masterName, type: 'master' });
+                    document.getElementById("master-name").value = "";
+                    updateSelectOptions();
+                    updateGraph();
+                } else if (getNodeById(masterName)) {
+                    alert("Master NFT already exists!");
+                }
+            });
+
+            // Lock Child NFT Button
+            document.getElementById("lock-child").addEventListener("click", () => {
+                const masterId = document.getElementById("lock-master").value;
+                const nftAddress = document.getElementById("child-nft-address").value.trim();
+                const tokenId = document.getElementById("child-token-id").value.trim();
+
+                if (!masterId || !nftAddress || !tokenId) {
+                    alert("Please fill out all fields.");
+                    return;
+                }
+
+                const childId = `${nftAddress}-${tokenId}`;
+                // Prevent duplicates
+                if (!getNodeById(childId)) {
+                    children.push({ id: childId, type: 'child' });
+                    links.push({ source: masterId, target: childId });
+                    document.getElementById("child-nft-address").value = "";
+                    document.getElementById("child-token-id").value = "";
+                    updateGraph();
+                } else {
+                    alert("Child NFT already locked!");
+                }
+            });
+
+            // Responsive SVG
+            window.addEventListener("resize", () => {
+                const newWidth = document.getElementById("graph-container").clientWidth;
+                svg.attr("width", newWidth);
+                simulation.force("center", d3.forceCenter(newWidth / 2, height / 2));
+                simulation.alpha(1).restart();
+            });
+
+            /******************************************
+             *  Simple Contact Form Handling          *
+             ******************************************/
+            const contactForm = document.getElementById("contact-form");
+            contactForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = sanitizeInput(document.getElementById("name").value);
+                const email = sanitizeInput(document.getElementById("email").value);
+                const message = sanitizeInput(document.getElementById("message").value);
+
+                // Basic validation
+                if (name && validateEmail(email) && message) {
+                    alert(
+                        "Thank you for reaching out!\n\n" +
+                        "Name: " + name + "\n" +
+                        "Email: " + email + "\n" +
+                        "Message: " + message + "\n\n" +
+                        "We will respond to your inquiry shortly."
+                    );
+                    contactForm.reset();
+                } else {
+                    alert("Please fill out all fields correctly.");
+                }
+            });
+
+            // Sanitize input to prevent XSS
+            function sanitizeInput(str) {
+                return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            // Validate email format
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            /******************************************
+             *  Mobile Menu Toggle                     *
+             ******************************************/
+            const mobileMenuButton = document.querySelector(".mobile-menu-button");
+            const navUl = document.querySelector("nav ul");
+
+            mobileMenuButton.addEventListener("click", () => {
+                navUl.classList.toggle("active");
+            });
+
+            /******************************************
+             *  Dark Mode Toggle                       *
+             ******************************************/
+            const darkModeToggle = document.querySelector(".dark-mode-toggle");
+            darkModeToggle.addEventListener("click", () => {
+                document.body.classList.toggle("dark-mode");
+                updateGraphColors();
+                updateFooterColors();
+                updateFormColors();
+                updateHeroColors();
+            });
+
+            function updateGraphColors() {
+                svg.selectAll(".link")
+                    .attr("stroke", document.body.classList.contains("dark-mode") ? "#555" : "#999");
+
+                svg.selectAll(".node")
+                    .attr("fill", d => d.type === 'master' ?
+                        (document.body.classList.contains("dark-mode") ? "#ff4081" : "#ff7e5f") :
+                        (document.body.classList.contains("dark-mode") ? "#ffb3ba" : "#feb47b"));
+            }
+
+            function updateFooterColors() {
+                // Footer styles are handled via CSS
+            }
+
+            function updateFormColors() {
+                // Form styles are handled via CSS
+            }
+
+            function updateHeroColors() {
+                // Hero section styles are handled via CSS
+            }
+
+            /******************************************
+             *  Active Nav Link Highlighting           *
+             ******************************************/
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll("nav a");
+
+            window.addEventListener("scroll", () => {
+                let current = "";
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute("id");
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href") === "#" + current) {
+                        link.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
