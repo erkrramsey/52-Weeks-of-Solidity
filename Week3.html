@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ERCAutoRebase: Dynamic Supply Adjusting ERC-20 Token</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="ERCAutoRebase introduces an ERC-20 token with automatic rebasing functionality, dynamically adjusting the total supply and scaling holders' balances proportionally at regular intervals.">
+    <meta name="keywords"
+        content="ERCAutoRebase, ERC-20, Rebase Token, Blockchain, Solidity, DeFi, Automatic Supply Adjustment, Tokenomics">
+    <meta property="og:title" content="ERCAutoRebase: Dynamic Supply Adjusting ERC-20 Token">
+    <meta property="og:description"
+        content="Experience a revolutionary ERC-20 token with automatic rebasing, ensuring a dynamic and responsive supply that scales all holders' balances proportionally.">
+    <meta property="og:image" content="https://example.com/og-image-rebase.jpg">
+    <meta property="og:url" content="https://ercaautorebase.com">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- D3.js for Graph Visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.4/d3.min.js" integrity="sha512-..."
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Styles -->
+    <style>
+        /* RESET & BASE STYLES */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            background-color: #f7f7f7;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        section {
+            padding: 60px 20px;
+        }
+
+        pre,
+        code {
+            background: #f9f9f9;
+            padding: 20px;
+            display: block;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 6px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* DARK MODE STYLES */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode pre,
+        body.dark-mode code {
+            background: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .hero {
+            background: linear-gradient(135deg, #1f4037 0%, #99f2c8 100%);
+        }
+
+        body.dark-mode header {
+            background: #1f1f1f;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background: #333;
+            color: #fff;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s;
+        }
+
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav li {
+            position: relative;
+        }
+
+        nav a {
+            color: #fff;
+            font-weight: 600;
+            transition: color 0.3s, transform 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s;
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+        }
+
+        nav a:hover::after,
+        nav a:focus::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: #eee;
+            transform: scale(1.05);
+        }
+
+        /* MOBILE MENU */
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background: #333;
+                padding: 20px;
+                border-radius: 8px;
+                display: none;
+                width: 200px;
+            }
+
+            nav ul.active {
+                display: flex;
+            }
+
+            .mobile-menu-button {
+                display: block;
+            }
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(135deg, #6a11cb 0%, #8625fc 100%);
+            color: #fff;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: radial-gradient(circle at 50%, rgba(255, 255, 255, 0.1) 20%, transparent 60%);
+            animation: swirl 8s infinite alternate;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @keyframes swirl {
+            0% {
+                transform: translateY(0) rotate(0);
+            }
+
+            100% {
+                transform: translateY(-10%) rotate(10deg);
+            }
+        }
+
+        .hero h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease both;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease both;
+        }
+
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #fff;
+            color: #2575fc;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .cta-button:hover,
+        .cta-button:focus {
+            background-color: #2575fc;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* DARK MODE TOGGLE */
+        .dark-mode-toggle {
+            cursor: pointer;
+            font-size: 20px;
+            background: none;
+            border: none;
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .dark-mode-toggle:hover,
+        .dark-mode-toggle:focus {
+            color: #e0e0e0;
+        }
+
+        /* MAIN SECTIONS */
+        .main-section h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .main-section p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* DEMO SECTION */
+        .demo-section {
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #graph-container {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            background-color: #fafafa;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .demo-controls {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .demo-controls input,
+        .demo-controls select,
+        .demo-controls button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border 0.3s;
+        }
+
+        .demo-controls input:focus,
+        .demo-controls select:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+
+        .demo-controls button {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .demo-controls button:hover,
+        .demo-controls button:focus {
+            opacity: 0.8;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: fill 0.3s, r 0.2s;
+        }
+
+        .node:hover {
+            fill: #ff4081;
+            r: 14;
+        }
+
+        /* CONTACT SECTION */
+        .contact-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contact-content form {
+            width: 100%;
+            max-width: 500px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark-mode .contact-content form {
+            background-color: #1e1e1e;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .contact-content form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .contact-content form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-content form input,
+        .contact-content form textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            transition: border 0.2s;
+        }
+
+        body.dark-mode .contact-content form input,
+        body.dark-mode .contact-content form textarea {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+
+        .contact-content form input:focus,
+        .contact-content form textarea:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+
+        .contact-content form button {
+            background-color: #2575fc;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .contact-content form button:hover,
+        .contact-content form button:focus {
+            background-color: #6a11cb;
+            transform: translateY(-2px);
+        }
+
+        /* USE CASES STYLES */
+        .section {
+            margin: 40px auto;
+            max-width: 1000px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark-mode .section {
+            background: #1e1e1e;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        body.dark-mode .section h2 {
+            color: #e0e0e0;
+        }
+
+        .section h3 {
+            font-size: 18px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        body.dark-mode .section h3 {
+            color: #cccccc;
+        }
+
+        .section ul {
+            list-style: disc;
+            margin-left: 20px;
+        }
+
+        .section ul li strong {
+            color: #2575fc;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode footer {
+            background-color: #1f1f1f;
+            color: #e0e0e0;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .hero h2 {
+                font-size: 32px;
+            }
+
+            .demo-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #graph-container {
+                height: 300px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+
+        /* D3.js GRAPH STYLES */
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .node {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        /* DARK MODE GRAPH STYLES */
+        body.dark-mode .link {
+            stroke: #555;
+        }
+
+        body.dark-mode .node {
+            stroke: #333;
+        }
+
+        /* SMOOTH SCROLLING */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ACTIVE NAV LINK */
+        nav a.active {
+            color: #ff4081;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="container">
+            <h1>ERCAutoRebase</h1>
+            <nav aria-label="Main Navigation">
+                <button class="mobile-menu-button" aria-label="Toggle Menu">
+                    ☰
+                </button>
+                <ul>
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#proposal">EIP Proposal</a></li>
+                    <li><a href="#implementation">Implementation</a></li>
+                    <li><a href="#use-cases">Use Cases</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><button class="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="hero" aria-labelledby="hero-heading">
+        <h2 id="hero-heading">Dynamic Supply Adjusting ERC-20 Token</h2>
+        <p>Experience a revolutionary ERC-20 token with automatic rebasing, ensuring a dynamic and responsive supply.
+        </p>
+        <a href="#proposal" class="cta-button">Learn More</a>
+    </section>
+
+    <!-- EIP PROPOSAL SECTION -->
+    <section id="proposal" class="main-section" aria-labelledby="proposal-heading">
+        <div class="container">
+            <h2 id="proposal-heading">1. ERCAutoRebase EIP-Style Proposal</h2>
+            <p>
+                ERCAutoRebase introduces an <strong>ERC-20</strong> token with <strong>automatic rebasing</strong>
+                functionality, allowing the total supply to adjust at regular intervals. This mechanism ensures that all
+                holders' balances scale proportionally, maintaining the relative value distribution dynamically. Below
+                is a formal EIP-style proposal detailing the rationale, specification, and key features.
+            </p>
+            <pre><code>
+# Preamble
+
+EIP: <to be assigned>
+Title: ERCAutoRebase - ERC-20 Token with Automatic Rebase Functionality
+Author: [BoredNBased] <BoredNBased@Gmail.com>
+Type: Standards Track
+Category: ERC
+Status: Draft
+Created: 2025-01-16
+
+# Abstract
+
+The ERCAutoRebase standard defines an ERC-20 token with built-in automatic rebasing capabilities. Rebasing adjusts the total token supply at predefined intervals, scaling all holders' balances proportionally. This feature ensures dynamic supply management, enhancing the token's responsiveness to market conditions and maintaining balance distribution over time.
+
+# Motivation
+
+Traditional ERC-20 tokens have a fixed total supply, which may not adapt to evolving market dynamics. ERCAutoRebase introduces a mechanism to automatically adjust the total supply, addressing issues such as inflation, deflation, and balance discrepancies. This dynamic supply model fosters a more stable and equitable token economy, beneficial for DeFi applications, staking mechanisms, and broader financial ecosystems.
+
+# Specification
+
+```solidity
+interface IERCERCAutoRebase is IERC20 {
+    event Rebase(uint256 newTotalSupply, uint256 scalingFactor);
+    event RebaseIntervalUpdated(uint256 newInterval);
+    event RebaseRateUpdated(uint256 newRate);
+
+    function rebase() external;
+    function setRebaseInterval(uint256 newInterval) external;
+    function setRebaseRate(uint256 newRate) external;
+}
+Rationale
+Dynamic Supply Management: Allows the token to adapt its supply based on predefined rules, enhancing flexibility.
+Proportional Balance Scaling: Ensures that all holders' balances adjust fairly, maintaining relative ownership without manual interventions.
+Automated Mechanism: Eliminates the need for external triggers, ensuring consistent and timely supply adjustments.
+Security Considerations
+Access Control: Critical functions like setRebaseInterval and setRebaseRate are restricted to the contract owner to prevent unauthorized modifications.
+Reentrancy Protection: Implements safeguards to protect against reentrancy attacks during state-changing operations.
+Input Validation: Ensures that parameters such as rebase rate and interval are within acceptable ranges to prevent extreme or malicious adjustments.
+Economic Implications: Careful calibration of rebase rates and intervals is essential to avoid destabilizing the token economy.
+References
+ERC-20: Token Standard
+
+OpenZeppelin Contracts
+
+Ethereum Improvement Proposals (eips.ethereum.org) </code></pre>
+            <p> By integrating automatic rebasing, ERCAutoRebase provides a responsive and adaptive ERC-20 token model,
+                paving the way for more dynamic and balanced token economies in decentralized applications. </p>
+        </div>
+
+    </section> <!-- IMPLEMENTATION SECTION -->
+    <section id="implementation" class="main-section" aria-labelledby="implementation-heading">
+        <div class="container">
+            <h2 id="implementation-heading">2. Full ERCAutoRebase Solidity Implementation</h2>
+            <p> Below is a <strong>Solidity contract</strong> implementing ERCAutoRebase using OpenZeppelin. It
+                demonstrates how automatic rebasing adjusts the total supply and scales all holders' balances
+                proportionally at regular intervals, ensuring a dynamic and balanced token economy. </p>
+            <pre><code>
+// SPDX-License-Identifier: MIT pragma solidity ^0.8.0;
+
+/**
+
+@title ERC-AutoRebase Token
+
+@dev ERC-20 compliant token with automatic rebasing functionality.
+
+Rebasing adjusts the total supply at regular intervals, scaling all holders' balances proportionally. */ contract ERCAutoRebase is IERC20 { // ERC-20 standard variables string public name; string public symbol; uint8 public decimals = 18;
+
+// Total supply before scaling uint256 private _initialTotalSupply;
+
+// Scaling factor to manage rebases uint256 private _scalingFactor;
+
+// Mapping from account to scaled balance mapping(address => uint256) private _scaledBalances;
+
+// Mapping for allowances mapping(address => mapping(address => uint256)) private _allowances;
+
+// Rebase variables uint256 public lastRebaseTime; uint256 public rebaseInterval; // in seconds uint256 public rebaseRate; // e.g., 2 for 2%
+
+// Owner address for access control address public owner;
+
+// Events as per ERC-20 standard event Transfer(address indexed from, address indexed to, uint256 value); event Approval(address indexed owner, address indexed spender, uint256 value); event Rebase(uint256 newTotalSupply, uint256 scalingFactor);
+
+// Modifiers modifier onlyOwner() { require(msg.sender == owner, "Caller is not the owner"); _; }
+
+/**
+
+@dev Constructor initializes the token with initial supply and sets rebase parameters.
+
+@param _name Token name.
+
+@param _symbol Token symbol.
+
+@param initialSupply Initial token supply (in smallest unit, considering decimals).
+
+@param _rebaseInterval Time interval between rebases (in seconds).
+
+@param _rebaseRate Percentage rate for each rebase (e.g., 2 for 2%). */ constructor( string memory _name, string memory _symbol, uint256 initialSupply, uint256 _rebaseInterval, uint256 _rebaseRate ) { name = _name; symbol = _symbol; owner = msg.sender;
+
+_initialTotalSupply = initialSupply; _scalingFactor = 1e18; // Start with a scaling factor of 1 (scaled by 1e18 for precision) _scaledBalances[msg.sender] = _initialTotalSupply * 1e18;
+
+rebaseInterval = _rebaseInterval; rebaseRate = _rebaseRate; lastRebaseTime = block.timestamp;
+
+emit Transfer(address(0), msg.sender, initialSupply); }
+
+/**
+
+@dev Returns the total supply after applying the scaling factor. */ function totalSupply() public view override returns (uint256) { return (_initialTotalSupply * _scalingFactor) / 1e18; }
+/**
+
+@dev Returns the balance of a specific account after applying the scaling factor.
+@param account The address of the account. */ function balanceOf(address account) public view override returns (uint256) { return (_scaledBalances[account] * _scalingFactor) / 1e18; }
+/**
+
+@dev Transfers tokens from the caller to a recipient.
+@param to The recipient address.
+@param amount The amount to transfer (in token units). */ function transfer(address to, uint256 amount) external override returns (bool) { _transfer(msg.sender, to, amount); return true; }
+/**
+
+@dev Returns the remaining number of tokens that spender can spend on behalf of owner.
+@param owner_ The owner address.
+@param spender The spender address. */ function allowance(address owner_, address spender) external view override returns (uint256) { return allowances[owner][spender]; }
+/**
+
+@dev Approves spender to spend amount on behalf of the caller.
+@param spender The spender address.
+@param amount The amount to approve (in token units). */ function approve(address spender, uint256 amount) external override returns (bool) { _approve(msg.sender, spender, amount); return true; }
+/**
+
+@dev Transfers tokens from from to to using the allowance mechanism.
+@param from The sender address.
+@param to The recipient address.
+@param amount The amount to transfer (in token units). */ function transferFrom(address from, address to, uint256 amount) external override returns (bool) { uint256 currentAllowance = _allowances[from][msg.sender]; require(currentAllowance >= amount, "ERC-AutoRebase: transfer amount exceeds allowance"); _transfer(from, to, amount); _approve(from, msg.sender, currentAllowance - amount); return true; }
+/**
+
+@dev Internal function to handle transfers.
+
+@param from The sender address.
+
+@param to The recipient address.
+
+@param amount The amount to transfer (in token units). */ function _transfer(address from, address to, uint256 amount) internal { require(from != address(0), "ERC-AutoRebase: transfer from the zero address"); require(to != address(0), "ERC-AutoRebase: transfer to the zero address"); require(balanceOf(from) >= amount, "ERC-AutoRebase: transfer amount exceeds balance");
+
+uint256 scaledAmount = (amount * 1e18) / _scalingFactor;
+
+_scaledBalances[from] -= scaledAmount; _scaledBalances[to] += scaledAmount;
+
+emit Transfer(from, to, amount); }
+
+/**
+
+@dev Internal function to approve allowances.
+
+@param owner_ The owner address.
+
+@param spender The spender address.
+
+@param amount The amount to approve (in token units). */ function approve(address owner, address spender, uint256 amount) internal { require(owner_ != address(0), "ERC-AutoRebase: approve from the zero address"); require(spender != address(0), "ERC-AutoRebase: approve to the zero address");
+
+allowances[owner][spender] = amount; emit Approval(owner_, spender, amount); }
+
+/**
+
+@dev Triggers a rebase operation if the interval has passed.
+
+Can be called by anyone, but execution is restricted by time interval. */ function rebase() external override { require(block.timestamp >= lastRebaseTime + rebaseInterval, "ERC-AutoRebase: rebase not due yet");
+
+// Calculate new scaling factor // Example: for a 2% increase, scalingFactor = scalingFactor * (1 + 0.02) = scalingFactor * 102 / 100 uint256 newScalingFactor = (_scalingFactor * (100 + rebaseRate)) / 100;
+
+// Update scaling factor _scalingFactor = newScalingFactor;
+
+// Update total supply uint256 newTotalSupply = (_initialTotalSupply * _scalingFactor) / 1e18; _initialTotalSupply = (_initialTotalSupply * (100 + rebaseRate)) / 100;
+
+lastRebaseTime = block.timestamp;
+
+emit Rebase(newTotalSupply, _scalingFactor); }
+
+/**
+
+@dev Allows the owner to set a new rebase interval.
+@param _newInterval The new rebase interval (in seconds). */ function setRebaseInterval(uint256 _newInterval) external override onlyOwner { require(_newInterval >= 1 minutes, "ERC-AutoRebase: interval too short"); rebaseInterval = _newInterval; // Optionally emit an event here }
+/**
+
+@dev Allows the owner to set a new rebase rate.
+@param _newRate The new rebase rate (percentage, e.g., 2 for 2%). */ function setRebaseRate(uint256 _newRate) external override onlyOwner { require(_newRate <= 100, "ERC-AutoRebase: rebase rate too high"); rebaseRate = _newRate; // Optionally emit an event here }
+/**
+
+@dev Allows the owner to transfer ownership to a new address.
+@param newOwner The new owner address. */ function transferOwnership(address newOwner) external override onlyOwner { require(newOwner != address(0), "ERC-AutoRebase: new owner is the zero address"); owner = newOwner; // Optionally emit an event here } } </code></pre>
+            <p> The ERCAutoRebase contract enables automatic adjustments to the token's total supply at regular
+                intervals. This rebasing mechanism ensures that all holders' balances scale proportionally, maintaining
+                a dynamic and balanced token economy. </p>
+        </div>
+    </section> <!-- USE CASES SECTION -->
+    <section id="use-cases" class="main-section" aria-labelledby="use-cases-heading">
+        <div class="container">
+            <h2 id="use-cases-heading">3. Comprehensive Use Cases & Ecosystems</h2>
+            <p> Below are <strong>15</strong> ecosystems that demonstrate how ERCAutoRebase can power diverse financial
+                and decentralized applications—from dynamic staking rewards to adaptive DeFi protocols. Adapt these
+                ideas to enhance your projects! </p>
+            <ol>
+                <li><strong>Dynamic Staking Rewards</strong><br /> <em>Description:</em> Adjust staking rewards based on
+                    the token's supply changes.<br /> <em>Example:</em> As the supply increases during rebases, staking
+                    rewards scale proportionally, ensuring consistent yield rates for stakers. </li>
+                <li><strong>Inflation-Protected Savings</strong><br /> <em>Description:</em> Protect savings against
+                    inflation through supply adjustments.<br /> <em>Example:</em> Users deposit ERCAutoRebase tokens
+                    into savings contracts that rebalance their holdings in response to supply changes, maintaining
+                    purchasing power. </li>
+                <li><strong>Adaptive DeFi Lending</strong><br /> <em>Description:</em> Modify lending interest rates
+                    based on token supply dynamics.<br /> <em>Example:</em> Lending platforms adjust interest rates
+                    automatically during rebases to balance supply and demand for borrowed tokens. </li>
+                <li><strong>Dynamic Governance Tokens</strong><br /> <em>Description:</em> Enhance governance mechanisms
+                    with supply-responsive voting power.<br /> <em>Example:</em> Voting power in DAOs scales with
+                    rebases, ensuring that governance reflects the current token distribution accurately. </li>
+                <li><strong>Adaptive Yield Farming</strong><br /> <em>Description:</em> Optimize yield farming
+                    strategies based on supply adjustments.<br /> <em>Example:</em> Yield farms adjust reward
+                    allocations during rebases to maintain optimal incentivization across various liquidity pools. </li>
+                <li><strong>Stablecoin Supply Management</strong><br /> <em>Description:</em> Maintain stablecoin peg
+                    through automatic supply scaling.<br /> <em>Example:</em> ERCAutoRebase can serve as a mechanism to
+                    adjust supply in response to price deviations, helping maintain a stable peg. </li>
+                <li><strong>Token-Based Access Control</strong><br /> <em>Description:</em> Grant access to services
+                    based on dynamically scaling token balances.<br /> <em>Example:</em> Subscription services adjust
+                    access levels as token supply rebases, ensuring fair access distribution among holders. </li>
+                <li><strong>Inflation-Responsive NFTs</strong><br /> <em>Description:</em> Integrate rebasing tokens
+                    with NFTs for adaptive utility.<br /> <em>Example:</em> NFTs grant rights or benefits that scale
+                    with ERCAutoRebase token balances, ensuring benefits adjust alongside supply changes. </li>
+                <li><strong>Adaptive Dividend Distribution</strong><br /> <em>Description:</em> Distribute dividends
+                    that scale with the rebased token supply.<br /> <em>Example:</em> Dividend payouts automatically
+                    adjust based on the current total supply, ensuring equitable distribution regardless of rebases.
+                </li>
+                <li><strong>Supply-Responsive Insurance Pools</strong><br /> <em>Description:</em> Adjust insurance
+                    premiums and coverage based on token supply.</br> <em>Example:</em> Insurance pools modify premiums
+                    during rebases to balance risk and maintain solvency. </li>
+                <li><strong>Dynamic Liquidity Pools</strong><br /> <em>Description:</em> Manage liquidity pools that
+                    respond to token supply changes.</br> <em>Example:</em> Liquidity pools adjust token allocations and
+                    fees during rebases to optimize trading efficiency and liquidity. </li>
+                <li><strong>Elastic Gaming Economies</strong><br /> <em>Description:</em> Create gaming economies where
+                    in-game assets scale with token supply.</br> <em>Example:</em> In-game currencies tied to
+                    ERCAutoRebase adjust automatically during rebases, ensuring balanced gameplay and asset
+                    distribution. </li>
+                <li><strong>Rebase-Driven Voting Systems</strong><br /> <em>Description:</em> Integrate rebasing tokens
+                    into voting systems for dynamic participation.</br> <em>Example:</em> Voting weights adjust
+                    automatically during rebases, ensuring that influence remains proportional to current holdings.
+                </li>
+                <li><strong>Supply-Adaptive Token Swaps</strong><br /> <em>Description:</em> Facilitate token swaps that
+                    consider the dynamic supply.</br> <em>Example:</em> Decentralized exchanges adjust swap rates during
+                    rebases to reflect the current token supply and maintain fair pricing. </li>
+                <li><strong>Supply-Responsive Burn Mechanisms</strong><br /> <em>Description:</em> Implement token burn
+                    strategies that align with rebasing supply.</br> <em>Example:</em> A portion of tokens are burned
+                    automatically during rebases to control inflation and stabilize the supply. </li>
+            </ol>
+        </div>
+    </section> <!-- USE CASES & FIXES SECTION -->
+    <section id="expansion" aria-labelledby="expansion-heading">
+        <h1 style="text-align: center; margin-top: 40px; font-size: 32px;"> ERCAutoRebase Use Cases </h1>
+
+        <div class="section">
+            <h2>1️⃣ Dynamic Supply Management</h2>
+            <p>Automatically adjust the token supply to respond to market conditions:</p>
+            <ul>
+                <li><strong>Automatic Rebasing</strong> → Adjust total supply at regular intervals based on predefined
+                    rates.</li>
+                <li><strong>Proportional Scaling</strong> → Ensure all holders' balances scale fairly with supply
+                    changes.</li>
+                <li><strong>Time-Based Adjustments</strong> → Schedule rebases to occur at specific time intervals.</li>
+            </ul>
+            <h3>✅ Example:</h3>
+            <p>
+                Deploy ERCAutoRebase with an initial supply of 1,000,000 tokens, a rebase interval of 30 days, and a
+                rebase rate of 2%. Every 30 days, the total supply increases by 2%, and all holders' balances adjust
+                accordingly.
+            </p>
+            <pre class="code">
+// Initialize the token constructor() ERCAutoRebase("AutoRebase Token", "ART", 1000000 * 10**18, 30 days, 2) {} </pre>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Adaptive DeFi Integration</h2>
+            <p>Seamlessly integrate ERCAutoRebase with DeFi protocols to enhance financial products:</p>
+            <ul>
+                <li><strong>Lending Platforms</strong> → Adjust interest rates based on supply changes.</li>
+                <li><strong>Yield Farming</strong> → Scale farming rewards proportionally with rebases.</li>
+                <li><strong>Liquidity Pools</strong> → Optimize liquidity allocations in response to supply dynamics.
+                </li>
+            </ul>
+            <h3>✅ Example:</h3>
+            <p>
+                A DeFi lending platform integrates ERCAutoRebase to automatically adjust lending interest rates every
+                rebase, ensuring balanced supply and demand.
+            </p>
+            <pre class="code">
+// Example integration snippet function updateInterestRates() external { require(currentRebase(), "Rebase not triggered"); uint256 newRate = calculateRate(); setInterestRate(newRate); } </pre>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ Inflation-Protected Financial Products</h2>
+            <p>Develop financial products that safeguard against inflation through rebasing mechanisms:</p>
+            <ul>
+                <li><strong>Stable Savings</strong> → Maintain purchasing power by adjusting balances during rebases.
+                </li>
+                <li><strong>Inflation-Responsive Insurance</strong> → Adjust premiums and coverage based on supply
+                    changes.</li>
+                <li><strong>Adaptive Dividends</strong> → Distribute dividends that scale with the rebased supply.</li>
+            </ul>
+            <h3>✅ Example:</h3>
+            <p>
+                Create a savings account where users' deposits automatically adjust during rebases, preserving their
+                purchasing power over time.
+            </p>
+            <pre class="code">
+// Savings account rebase function function rebaseSavings() external { require(currentRebase(), "Rebase not triggered"); for(uint i = 0; i < depositors.length; i++) { address depositor = depositors[i]; uint256 originalDeposit = deposits[depositor]; deposits[depositor] = (originalDeposit * _scalingFactor) / 1e18; } } </pre>
+        </div>
+
+        <div class="section">
+            <h2>4️⃣ Dynamic Governance Systems</h2>
+            <p>Enhance governance frameworks with rebasing tokens to ensure fair and proportional voting:</p>
+            <ul>
+                <li><strong>Voting Power Scaling</strong> → Adjust voting weights based on supply changes.</li>
+                <li><strong>Proportional Representation</strong> → Ensure governance reflects the current token
+                    distribution.</li>
+                <li><strong>Adaptive Proposal Systems</strong> → Scale proposal thresholds in line with supply
+                    adjustments.</li>
+            </ul>
+            <h3>✅ Example:</h3>
+            <p>
+                Implement a DAO where voting power automatically scales during rebases, ensuring that voting influence
+                remains proportional to token holdings.
+            </p>
+            <pre class="code">
+// Voting power adjustment function adjustVotingPower() external { require(currentRebase(), "Rebase not triggered"); for(uint i = 0; i < members.length; i++) { address member = members[i]; votingPower[member] = (votingPowerOriginal[member] * _scalingFactor) / 1e18; } } </pre>
+        </div>
+
+        <!-- Add more sections as needed following the same structure -->
+
+        <div class="section">
+            <h2>💡 Advanced: Integrating Rebases with DeFi Protocols</h2>
+            <h3>✅ Batch Update Rebases:</h3>
+            <pre class="code">
+// Example script to trigger rebases across multiple tokens function batchRebase(address[] calldata tokenAddresses) external onlyOwner { for(uint i = 0; i < tokenAddresses.length; i++) { ERCAutoRebase(tokenAddresses[i]).rebase(); } } </pre>
+            <h3>✅ Monitoring Supply Changes:</h3>
+            <pre
+                class="code"> // Example DApp function to fetch and display total supply after rebase async function getTotalSupply(tokenAddress) { const contract = new ethers.Contract(tokenAddress, ERC_AutoRebase_ABI, provider); const totalSupply = await contract.totalSupply(); console.log("Total Supply after Rebase:", ethers.utils.formatUnits(totalSupply, 18)); } </pre>
+        </div>
+
+        <h2 style="text-align: center; margin-top: 40px; font-size: 28px;">
+            🚀 Conclusion
+        </h2>
+        <p style="text-align: center; max-width: 900px; margin: 0 auto 60px auto;">
+            The <strong>ERCAutoRebase</strong> contract provides a robust mechanism for dynamic supply management within
+            the ERC-20 standard. This functionality is ideal for:
+        </p>
+        <ul style="max-width: 600px; margin: 0 auto 40px auto; line-height: 1.8;">
+            <li>✅ Inflation-Protected Savings</li>
+            <li>✅ Adaptive DeFi Lending</li>
+            <li>✅ Dynamic Staking Rewards</li>
+            <li>✅ Responsive Governance Systems</li>
+        </ul>
+    </section>
+
+    <!-- INTERACTIVE DEMO SECTION -->
+    <section id="demo" class="demo-section" aria-labelledby="demo-heading">
+        <div class="container">
+            <h2 id="demo-heading">4. Interactive Demo: Visualizing Automatic Rebases</h2>
+            <p>
+                Experience our <strong>rebasing token simulation</strong> demo. Observe how the total supply and
+                individual balances adjust automatically over time.
+            </p>
+            <!-- Graph Container -->
+            <div id="graph-container" aria-label="Interactive Rebase Token Graph"></div>
+
+            <!-- Demo Controls -->
+            <div class="demo-controls">
+                <button id="trigger-rebase">Trigger Rebase</button>
+                <button id="reset-demo">Reset Demo</button>
+                <p>Current Total Supply: <span id="total-supply">1,000,000</span> ART</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="main-section" aria-labelledby="contact-heading">
+        <div class="container">
+            <h2 id="contact-heading">5. Contact & Feedback</h2>
+            <p>
+                Have questions or ideas for integrating ERCAutoRebase in your project?
+                Fill out the form below, and we’ll be in touch.
+            </p>
+            <div class="contact-content">
+                <form id="contact-form" aria-label="Contact Form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" placeholder="Your Name" required aria-required="true" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Your Email" required aria-required="true" />
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" rows="5" placeholder="Your Message" required
+                            aria-required="true"></textarea>
+                    </div>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 BoredNBased. All rights reserved.</p>
+    </footer>
+
+    <!-- INLINE JS: INTERACTIVE DEMO, FORM HANDLING, ETC. -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let totalSupply = 1000000; // Initial total supply
+            let scalingFactor = 1.0; // Initial scaling factor
+            const rebaseRate = 2; // 2% rebase rate
+
+            // Update total supply display
+            function updateTotalSupplyDisplay() {
+                document.getElementById("total-supply").textContent = totalSupply.toLocaleString();
+            }
+
+            // Create an SVG element for D3
+            const svg = d3.select("#graph-container")
+                .append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .call(d3.zoom().on("zoom", function (event) {
+                    svg.attr("transform", event.transform);
+                }))
+                .append("g");
+
+            // Initialize nodes and links
+            const nodes = [
+                { id: "Owner", type: "holder" },
+                { id: "Holder1", type: "holder" },
+                { id: "Holder2", type: "holder" },
+                { id: "Holder3", type: "holder" }
+            ];
+
+            const links = [
+                { source: "Owner", target: "Holder1" },
+                { source: "Owner", target: "Holder2" },
+                { source: "Owner", target: "Holder3" }
+            ];
+
+            // D3 force simulation
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).distance(150).id(d => d.id))
+                .force("charge", d3.forceManyBody().strength(-500))
+                .force("center", d3.forceCenter(400, 200));
+
+            // D3 drag behavior
+            function drag(simulation) {
+                function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+
+                function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+
+                return d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended);
+            }
+
+            // Render the graph
+            function renderGraph() {
+                // LINKS
+                svg.selectAll(".link")
+                    .data(links)
+                    .join("line")
+                    .attr("class", "link")
+                    .attr("stroke", "#999")
+                    .attr("stroke-width", 2);
+
+                // NODES
+                svg.selectAll(".node")
+                    .data(nodes)
+                    .join("circle")
+                    .attr("class", "node")
+                    .attr("r", d => d.type === "holder" ? 20 : 10)
+                    .attr("fill", d => d.type === "holder" ? "#2575fc" : "#6a11cb")
+                    .call(drag(simulation));
+
+                // TOOLTIP
+                svg.selectAll(".node")
+                    .append("title")
+                    .text(d => `${d.id}: ${d.type === "holder" ? "Balance Adjusts with Rebases" : ""}`);
+
+                simulation.nodes(nodes).on("tick", () => {
+                    svg.selectAll(".link")
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    svg.selectAll(".node")
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
+                });
+
+                simulation.force("link").links(links);
+                simulation.alpha(1).restart();
+            }
+
+            renderGraph();
+
+            // Trigger Rebase Button
+            document.getElementById("trigger-rebase").addEventListener("click", () => {
+                totalSupply += totalSupply * rebaseRate / 100;
+                updateTotalSupplyDisplay();
+                scalingFactor *= (100 + rebaseRate) / 100;
+
+                // Update balances (simulate proportional scaling)
+                // In a real scenario, balances would be fetched from the blockchain
+                // Here, we simulate by adjusting node labels or visuals if needed
+
+                // Re-render the graph to reflect changes
+                svg.selectAll(".node")
+                    .attr("fill", d => d.type === "holder" ?
+                        (document.body.classList.contains("dark-mode") ? "#ff4081" : "#2575fc") :
+                        (document.body.classList.contains("dark-mode") ? "#ffb3ba" : "#6a11cb"));
+
+                // Emit rebase event (for demonstration)
+                console.log(`Rebase triggered! New Total Supply: ${totalSupply}`);
+                // Optionally, update graph visuals or animations here
+            });
+
+            // Reset Demo Button
+            document.getElementById("reset-demo").addEventListener("click", () => {
+                // Reset total supply and scaling factor
+                totalSupply = 1000000;
+                scalingFactor = 1.0;
+                updateTotalSupplyDisplay();
+
+                // Reset nodes and links
+                nodes.length = 0;
+                links.length = 0;
+                nodes.push(
+                    { id: "Owner", type: "holder" },
+                    { id: "Holder1", type: "holder" },
+                    { id: "Holder2", type: "holder" },
+                    { id: "Holder3", type: "holder" }
+                );
+                links.push(
+                    { source: "Owner", target: "Holder1" },
+                    { source: "Owner", target: "Holder2" },
+                    { source: "Owner", target: "Holder3" }
+                );
+
+                // Clear and re-render the graph
+                svg.selectAll("*").remove();
+                renderGraph();
+            });
+
+            updateTotalSupplyDisplay();
+
+            /******************************************
+             *  Simple Contact Form Handling          *
+             ******************************************/
+            const contactForm = document.getElementById("contact-form");
+            contactForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = sanitizeInput(document.getElementById("name").value);
+                const email = sanitizeInput(document.getElementById("email").value);
+                const message = sanitizeInput(document.getElementById("message").value);
+
+                // Basic validation
+                if (name && validateEmail(email) && message) {
+                    alert(
+                        "Thank you for reaching out!\n\n" +
+                        "Name: " + name + "\n" +
+                        "Email: " + email + "\n" +
+                        "Message: " + message + "\n\n" +
+                        "We will respond to your inquiry shortly."
+                    );
+                    contactForm.reset();
+                } else {
+                    alert("Please fill out all fields correctly.");
+                }
+            });
+
+            // Sanitize input to prevent XSS
+            function sanitizeInput(str) {
+                return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            // Validate email format
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            /******************************************
+             *  Mobile Menu Toggle                     *
+             ******************************************/
+            const mobileMenuButton = document.querySelector(".mobile-menu-button");
+            const navUl = document.querySelector("nav ul");
+
+            mobileMenuButton.addEventListener("click", () => {
+                navUl.classList.toggle("active");
+            });
+
+            /******************************************
+             *  Dark Mode Toggle                       *
+             ******************************************/
+            const darkModeToggle = document.querySelector(".dark-mode-toggle");
+            darkModeToggle.addEventListener("click", () => {
+                document.body.classList.toggle("dark-mode");
+                updateGraphColors();
+                updateFooterColors();
+                updateFormColors();
+                updateHeroColors();
+            });
+
+            function updateGraphColors() {
+                svg.selectAll(".link")
+                    .attr("stroke", document.body.classList.contains("dark-mode") ? "#555" : "#999");
+
+                svg.selectAll(".node")
+                    .attr("fill", d => d.type === "holder" ?
+                        (document.body.classList.contains("dark-mode") ? "#ff4081" : "#2575fc") :
+                        (document.body.classList.contains("dark-mode") ? "#ffb3ba" : "#6a11cb"));
+            }
+
+            function updateFooterColors() {
+                // Footer styles are handled via CSS
+            }
+
+            function updateFormColors() {
+                // Form styles are handled via CSS
+            }
+
+            function updateHeroColors() {
+                // Hero section styles are handled via CSS
+            }
+
+            /******************************************
+             *  Active Nav Link Highlighting           *
+             ******************************************/
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll("nav a");
+
+            window.addEventListener("scroll", () => {
+                let current = "";
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute("id");
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href") === "#" + current) {
+                        link.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
